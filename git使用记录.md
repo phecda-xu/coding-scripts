@@ -40,3 +40,13 @@ git rm <>
 git status
 git push
 ```
+
+## 打tag
+
+- 将历史某次commit打上版本tag
+
+```
+git tag                                                                          # 查看当前tag
+git tag -a v2.0.0  ab33e3c1 -m "5月15日 测试版本"     # -a参数来创建一个带备注的tag，备注信息由-m指定
+git push origin v2.0.0
+```
