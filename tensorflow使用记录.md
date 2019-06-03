@@ -118,3 +118,48 @@ Tensor("enroll:0", shape=(?, 20, 40), dtype=float32)
 Tensor("verif:0", shape=(?, 20, 40), dtype=float32)
 Tensor("fingerprint_input:0", shape=(?, 20, 80), dtype=float32)
 ```
+
+### scope如何划分命名空间
+
+- tf.variable_scope()
+
+```
+使用tf.get_variable定义变量时:
+执行：
+with tf.variable_scope('scope1'):
+	v1 = tf.get_variable('var', shape=[1])
+	with tf.variable_scope('scope2'):
+		v2 = tf.get_variable('var', shape=[1])	
+v1.name, v2.name
+
+结果：
+('scope1/var:0', 'scope1/scope2/var:0')
+
+使用tf.Variable定义变量时:
+执行：
+with tf.variable_scope('scope'):
+	v1 = tf.Variable(1, name='var')
+	v2 = tf.Variable(2, name='var')
+v1.name, v2.name
+
+结果：
+('scope/var:0', 'scope/var_1:0')
+```
+
+- tf.name_scope()
+
+```
+当tf.get_variable遇上tf.name_scope，它定义的变量的最终完整名称将不受这个tf.name_scope的影响
+
+执行：
+with tf.variable_scope('v_scope'):
+	with tf.name_scope('n_scope'):
+		x = tf.Variable([1], name='x')
+		y = tf.get_variable('x', shape=[1], dtype=tf.int32)
+		z = x + y
+x.name, y.name, z.name
+
+结果：
+('v_scope/n_scope/x:0', 'v_scope/x:0', 'v_scope/n_scope/add:0')
+```
+
