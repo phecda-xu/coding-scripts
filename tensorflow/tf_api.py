@@ -6,7 +6,6 @@ def constant_():
     print(a)
     print(b)
 
-
 def zeros_ones_():
     zeros = tf.zeros([1,2,1], dtype=tf.int32)
     ones = tf.ones_like(zeros, dtype=None, name=None)
@@ -16,11 +15,11 @@ def zeros_ones_():
 def concat_():
     enroll = tf.placeholder(shape=[None, 20, 40], dtype=tf.float32, name="enroll") 
     verif = tf.placeholder(shape=[None, 20, 40], dtype=tf.float32, name="verif") 
-    fingerprint_input = tf.concat([enroll, verif], axis=2, name="fingerprint_input")
+    fingerprint_input = tf.concat([enroll, verif], axis=0, name="fingerprint_input")
 
-    print(enroll.shape)
-    print(verif.shape)
-    print(fingerprint_input.shape)
+    print(enroll)
+    print(verif)
+    print(fingerprint_input)
 
 def random_():
     tensor_r = tf.random_normal(shape=[2,3], mean=0, stddev=1)
@@ -35,9 +34,16 @@ def variable_():
     print(a2)
     print(a3)
 
+def get_variable_():
+    init = tf.constant_initializer([5])
+    x = tf.get_variable('x', shape=[1], initializer=init)
+    print(init)
+    print(x)
+
 if __name__=="__main__":
     # constant_()
     # zeros_ones_()
     # concat_()
     # random_()
     # variable_()
+    get_variable_()

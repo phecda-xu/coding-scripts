@@ -46,7 +46,7 @@ Tensor("random_normal:0", shape=(2, 3), dtype=float32)
 
 ### 变量函数
 
-- [`tf.Variable(initializer, name)`](tensorflow/tf_api.py)
+- [`tf.Variable(initializer, name, trainable)`](tensorflow/tf_api.py)
 
 ```
 initializer是初始化参数，可以有tf.random_normal，tf.constant
@@ -60,6 +60,18 @@ a3 = tf.Variable(tf.ones(shape=[2,3]), name='a3')
 <tf.Variable 'a1:0' shape=(2, 3) dtype=float32_ref>
 <tf.Variable 'a2:0' shape=() dtype=int32_ref>
 <tf.Variable 'a3:0' shape=(2, 3) dtype=float32_ref>
+```
+
+- [`tf.get_variable(name, shape, dtype, initializer)`](tensorflow/tf_api.py)
+
+```
+执行：
+init = tf.constant_initializer([5])
+x = tf.get_variable('x', shape=[1], initializer=init)
+
+结果：
+<tensorflow.python.ops.init_ops.Constant object at 0x7fc3b83be588>
+<tf.Variable 'x:0' shape=(1,) dtype=float32_ref>
 ```
 
 ### 张量操作函数
@@ -86,24 +98,23 @@ verif = tf.placeholder(shape=[None, 20, 40], dtype=tf.float32, name="verif")
 fingerprint_input = tf.concat([enroll, verif], axis=0, name="fingerprint_input")
 
 结果：
-enroll : (?, 20, 40)
-verif  : (?, 20, 40)
-fingerprint_input : (?, 20, 40)
+Tensor("enroll:0", shape=(?, 20, 40), dtype=float32)
+Tensor("verif:0", shape=(?, 20, 40), dtype=float32)
+Tensor("fingerprint_input:0", shape=(?, 20, 40), dtype=float32)
 
 执行：
 fingerprint_input = tf.concat([enroll, verif], axis=1, name="fingerprint_input")
 
 结果：
-enroll : (?, 20, 40)
-verif  : (?, 20, 40)
-fingerprint_input : (?, 40, 40)
-
+Tensor("enroll:0", shape=(?, 20, 40), dtype=float32)
+Tensor("verif:0", shape=(?, 20, 40), dtype=float32)
+Tensor("fingerprint_input:0", shape=(?, 40, 40), dtype=float32)
 
 执行：
 fingerprint_input = tf.concat([enroll, verif], axis=2, name="fingerprint_input")
 
 结果：
-enroll : (?, 20, 40)
-verif  : (?, 20, 40)
-fingerprint_input : (?, 20, 80)
+Tensor("enroll:0", shape=(?, 20, 40), dtype=float32)
+Tensor("verif:0", shape=(?, 20, 40), dtype=float32)
+Tensor("fingerprint_input:0", shape=(?, 20, 80), dtype=float32)
 ```
