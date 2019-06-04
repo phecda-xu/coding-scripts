@@ -1,6 +1,6 @@
 # tensorflow
 
-## api 使用
+## 一、api 使用
 
 ### 常量值函数
 
@@ -311,4 +311,16 @@ Tensor("Prod_3:0", shape=(2, 1), dtype=int32)
 Tensor("Prod_4:0", shape=(), dtype=int32)
 ```
 
-### 
+## 二、图
+
+### tf.reset_default_graph()
+
+```
+清空 default graph 以及 nodes
+```
+
+### tf.get_default_graph()
+
+```
+获取默认图
+```
