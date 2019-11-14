@@ -41,4 +41,4 @@ def boolean_string(s):
 
 parser.add_argument('--trainable', default=True, type=boolean_string, help="True or False")
 ```
-参考链接(1)[https://cloud.tencent.com/developer/ask/188470], (2)[https://docs.python.org/3/library/argparse.html#action]
+参考链接[1](https://cloud.tencent.com/developer/ask/188470), [2](https://docs.python.org/3/library/argparse.html#action)
