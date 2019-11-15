@@ -42,3 +42,11 @@ def boolean_string(s):
 parser.add_argument('--trainable', default=True, type=boolean_string, help="True or False")
 ```
 参考链接[1](https://cloud.tencent.com/developer/ask/188470), [2](https://docs.python.org/3/library/argparse.html#action)
+
+## str.format()
+
+```
+'{}-{}-{}'.format(a,b,c)            => 'a-b-c'
+'{1}-{0}-{1}岁'.format('a','b')     => 'b-a-b'
+'{:.4f}'.format(0.4000569789)       => '0.4001'
+```
