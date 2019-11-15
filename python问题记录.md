@@ -49,4 +49,5 @@ parser.add_argument('--trainable', default=True, type=boolean_string, help="True
 '{}-{}-{}'.format(a,b,c)            => 'a-b-c'
 '{1}-{0}-{1}岁'.format('a','b')     => 'b-a-b'
 '{:.4f}'.format(0.4000569789)       => '0.4001'
+'{name}{age}岁'.format(age=22,name='jc') => 'jc22岁'
 ```
