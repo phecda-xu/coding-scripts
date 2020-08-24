@@ -8,16 +8,29 @@ $ git clone https://github.com/phecda-xu/coding-scripts.git
 
 ## 新建branch
 
-- 手动新建后更新代码
+- 新建分支
 
 ```
-$ git pull
+新建本地分支
+$ git checkout -b branch_name
+推送到远程(同名)
+$ git push origin branch_name:branch_name
 ```
 
 ## 切换branch
 
 ```
 $ git checkout dev
+```
+
+## 删除branch
+
+```
+删除本地
+$ git branch branch_name -d
+
+删除远程代码仓
+$ git push origin --delete branch_name
 ```
 
 ## 合并
