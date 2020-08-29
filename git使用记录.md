@@ -1,5 +1,15 @@
 # gitlab-git
 
+## git SSH公钥生成
+
+拥有秘钥，就不需要每次下载和上传代码的时候输入账号和密码；
+
+```
+$ cd ~/.ssh
+$ ssh-keygen -o   # 生成 id_dsa 或 id_rsa 命名的文件，其中一个带有 .pub 扩展名
+$ cat ~/.ssh/id_rsa.pub  # 查看ssh 公钥 ，接下来复制公钥发给git管理员就行（其他人的操作，这里暂时不说）
+```
+
 ## 拉取
 
 ```
