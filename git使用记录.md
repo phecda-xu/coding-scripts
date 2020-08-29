@@ -63,3 +63,15 @@ git tag                                                                         
 git tag -a v2.0.0  ab33e3c1 -m "5月15日 测试版本"     # -a参数来创建一个带备注的tag，备注信息由-m指定
 git push origin v2.0.0
 ```
+
+## 移除对某个文件的跟踪
+
+- git rm -r --cached
+
+```
+git rm -r --cached .   # 移除全部跟踪
+git rm -r --cached filename # 移除对某个文件的跟踪
+
+git commit -m "update"
+git push
+```
