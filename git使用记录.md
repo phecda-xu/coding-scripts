@@ -85,3 +85,20 @@ git rm -r --cached filename # 移除对某个文件的跟踪
 git commit -m "update"
 git push
 ```
+
+## 切换远程仓库地址
+
+- 准备修改
+
+```
+git remote set-url origin url
+```
+
+- 先删除原本地址，再增加新地址
+
+```
+git remote rm origin
+git remote add origin https://github.com/phecda-xu/coding-scripts.git
+```
+
+- 也可以直接在 .git 文件夹下的config文件中直接修改。
