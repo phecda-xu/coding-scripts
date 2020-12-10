@@ -102,3 +102,29 @@ git remote add origin https://github.com/phecda-xu/coding-scripts.git
 ```
 
 - 也可以直接在 .git 文件夹下的config文件中直接修改。
+
+## git pull 冲突解决
+
+- 错误信息
+
+```
+error: Your local changes to the following files would be overwritten by merge:
+    xxx/xxx/xxx.php
+Please, commit your changes or stash them before you can merge.
+Aborting
+```
+
+- 解决办法
+
+```
+git stash  # 将当前的更改存入git栈
+git pull
+git stash pop # 从git栈中获取最新一次的修改记录，应用到当前的代码中
+```
+
+或者
+
+```
+git reset --hard # 丢弃当前的所有更改，强制与远程代码仓库对齐
+git pull
+```
