@@ -27,7 +27,7 @@ virtualenv -p /usr/bin/python3.5 venv
             venv 新建虚拟环境的路径及名称，名称可随意取。
 执行后如下图所示：
 
-![image](pic\1584081797462.jpg)
+![image](pic/1584081797462.jpg)
 
 - step 3 启动环境
 
@@ -39,7 +39,7 @@ source venv/bin/activate
 
 环境启动后，出现（venv）标识，如下图所示：
 
-![image](pic\1584081808619.jpg)
+![image](pic/1584081808619.jpg)
 
 - step 4 关闭环境
 
@@ -72,7 +72,7 @@ pip install package_file_path
 
 requirements.txt的内容如下形式：
 
-![image](pic\1584081813871.jpg)
+![image](pic/1584081813871.jpg)
 
 
 第一行可以加上 `-i https://mirrors.aliyun.com/pypi/simple/`以指明下载的源
