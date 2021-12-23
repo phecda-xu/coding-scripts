@@ -1,8 +1,6 @@
 import numpy as np
 import tensorflow as tf
 
-input_x = tf.placeholder(dtype=tf.float32, shape=[None, None, 257, 10])
-
 
 def unfold(input_x, ksizes, strides, padding):
     """
@@ -71,8 +69,8 @@ def unfold(input_x, ksizes, strides, padding):
                                   out_shape)
             pad_tensor = tf.reshape(pad_tensor, [shape[0], -1, shape[3]])
             pad_list.append(pad_tensor)
-    new_input = tf.stack(pad_list, axis=1)
-    out_put = tf.reshape(tf.transpose(new_input, [0, 2, 1, 3]), [shape[0], out_shape[1], out_shape[2], -1])
+    new_input = tf.stack(pad_list, axis=2)
+    out_put = tf.reshape(new_input, [shape[0], out_shape[1], out_shape[2], -1])
     return out_put
 
 
@@ -100,51 +98,107 @@ def unfold_2(input_x, inchannels, kernel_size, strides):
     return output
 
 
-
-shape = tf.shape(input_x)
-
-reduce_channels = 1
-
-scope = "conv"
-kernel_size = [3,3]
-strides=[1, 1]
-group = 1
-span_channels = group * kernel_size[0] * kernel_size[1]
-
-conv_1 = tf.layers.conv2d(input_x, reduce_channels, (1, 1), name=scope + '_1')
-conv_1 = tf.layers.batch_normalization(conv_1, training=True, name=scope + '/batch_norm')
-conv_1 = tf.nn.relu(conv_1)
-#
-weight = tf.layers.conv2d(conv_1, span_channels, (1, 1), name=scope + '_2')
-#
-weight = tf.reshape(weight, [shape[0], group, 1, kernel_size[0] * kernel_size[1], shape[1], shape[2]])
-
-output_1 = unfold(input_x, ksizes=kernel_size, strides=[1, 1, 1, 1], padding=[2, 2])
-
-# output_1 = tf.reshape(output_1, [shape[0],
-#                                  group,
-#                                  shape[3] // group,
-#                                  kernel_size[0] * kernel_size[1],
-#                                  shape[1],
-#                                  shape[2]])
-# output_involution = tf.reduce_sum(output_1 * weight, axis=3)
-# output_involution = tf.transpose(tf.reshape(output_involution, [shape[0], -1,  shape[1], shape[2]]), [0, 2, 3, 1])
-
-output_2 = unfold_2(input_x, 10, kernel_size, strides=strides)
-
-
-sess = tf.Session()
-sess.as_default()
-sess.run(tf.global_variables_initializer())
-
-x = np.random.random((2, 10, 257, 10))
-
-feed_dict = {input_x: x}
-
-# out_0, out_1, out_2 = sess.run([weight, output_1, output_2], feed_dict=feed_dict)
+def conv_bn_relu(inputs, out_channels, kernel_size, stride, is_training, padding='SAME',
+                 use_norm=True, use_act=True, scope='conv', skip_input=None):
+    """
+    Conv layer with batch_norm and relu.
+    :param inputs:  input tensor with shape as [batch, height, width, in_channels]
+    :param out_channels: int
+    :param kernel_size: tuple as (3,3)
+    :param stride:  tuple as (1,1)
+    :param is_training: True or False
+    :param padding: "SAME" or "VALID"
+    :param use_norm: True or False
+    :param use_act: True or False
+    :param scope: layer name
+    :param skip_input: skip connection or resdual connection
+    :return: tensor with shape as [batch, height, width, in_channels]
+    """
+    if padding.lower() == "same":
+        conv = tf.layers.conv2d(inputs, out_channels, kernel_size, stride, padding, name=scope)
+    elif padding.lower() == "valid":
+        h_left = int((kernel_size[0] - 1) / 2)
+        h_right = kernel_size[0] - 1 - h_left
+        w_left = int((kernel_size[1] - 1) / 2)
+        w_right = kernel_size[1] - 1 - w_left
+        inputs = tf.pad(inputs, tf.constant([[0, 0], [h_left, h_right], [w_left, w_right], [0, 0]]), "CONSTANT")
+        conv = tf.layers.conv2d(inputs, out_channels, kernel_size, stride, padding, name=scope)
+    else:
+        raise ValueError("Wrong input of padding: {}. Should be SAME or VALID!")
+    if use_norm:
+        conv = tf.layers.batch_normalization(conv, training=is_training, name=scope + '/batch_norm')
+    if use_act:
+        conv = tf.nn.relu(conv)
+    if skip_input is not None:
+        conv = conv + skip_input
+    return conv
 
 
-out_1, out_2 = sess.run([output_1, output_2], feed_dict=feed_dict)
 
-print(out_1.shape)
-print(out_2.shape)
+def involution_layer(input_x, in_channels, kernel_size, strides, padding, group=1, ratio=4, is_training=True, scope='involution'):
+    shape = tf.shape(input_x)
+    #
+    reduce_channels = int(in_channels / ratio)
+    span_channels = group * kernel_size[0] * kernel_size[1]
+    # reduce conv bn relu
+    conv_1 = tf.layers.conv2d(input_x, reduce_channels, (1, 1), name=scope + '/reduce')
+    conv_1 = tf.layers.batch_normalization(conv_1, training=is_training, name=scope + '/reduce/batch_norm')
+    conv_1 = tf.nn.relu(conv_1)
+    #
+    weight = tf.layers.conv2d(conv_1, span_channels, (1, 1), name=scope + '/span')
+    #
+    weight = tf.reshape(weight, [shape[0], shape[1], shape[2], group, 1, kernel_size[0] * kernel_size[1]])
+    weight = tf.concat([weight] * int(in_channels / group), axis=4)
+    #
+    output_1 = unfold(input_x, ksizes=kernel_size, strides=stride, padding=padding)
+    output_1 = tf.reshape(output_1, [shape[0],
+                                     shape[1],
+                                     shape[2],
+                                     group,
+                                     int(in_channels / group),
+                                     kernel_size[0] * kernel_size[1]])
+
+    output_2 = tf.reshape(tf.multiply(output_1, weight), [shape[0], shape[1] * shape[2], in_channels,
+                                                          kernel_size[0] * kernel_size[1]])
+    output_2 = tf.reduce_sum(output_2, axis=3)
+    output_2 = tf.reshape(output_2, [shape[0], shape[1], shape[2], in_channels])
+    return output_2
+
+
+if __name__ == "__main__":
+    input_x = tf.placeholder(dtype=tf.float32, shape=[None, None, 257, 32])
+    in_channels = 1
+    ratio = 1
+
+    scope = "conv"
+    kernel_size = [3,3]
+    padding=[1, 1]
+    strides=[1, 1]
+    group = 1
+
+    x = np.random.random((2, 10, 257, 32))
+
+    unfold_out_1 = unfold(input_x, ksizes=kernel_size, strides=stride, padding=padding)
+    unfold_out_2 = unfold_2(input_x, inchannels, kernel_size, strides)
+    involution_out = involution_layer(input_x, in_channels, kernel_size, strides, padding, group=group, ratio=ratio, is_training=True, scope='involution')
+
+    sess = tf.Session()
+    sess.as_default()
+    sess.run(tf.global_variables_initializer())
+
+    feed_dict = {input_x: x}
+
+    out_1, out_2, invo_out = sess.run([unfold_out_1, unfold_out_2, involution_out], feed_dict=feed_dict)
+
+    print(out_1.shape)
+    print(out_2.shape)
+    print(invo_out.shape)
+
+    total_params = tf.trainable_variables()
+    for i in total_params:
+        print('{} layer parameter shape: {} | numbers: | {}'.format(i.name, i.shape,
+                                                                    np.prod(tf.shape(i.value()).eval(session=sess))))
+    num_params = sum(map(lambda t: np.prod(tf.shape(t.value()).eval(session=sess)), total_params))
+    print('\nTotal number of Parameters: {}\n'.format(num_params))
+
+
