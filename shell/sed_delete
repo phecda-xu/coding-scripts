@@ -1,0 +1,11 @@
+#! /usr/local/bin
+
+
+input_txt=$1
+input_file=$2
+
+# 打印文档input_file 中包含 input_txt 的行
+sed -n "/$input_txt/p" $input_file
+
+# 删除文档input_file 中包含 input_txt 的行
+sed -i "/$input_txt/d" $input_file
